@@ -32,7 +32,7 @@ textOut:
 vCheck:			//check for validity
 	.align 4
 	mov r1, #0	//checking against the number 0 to check for negatives
-	ldr r0, =usrIn	
+	ldr r0, =usrIn  //store address of usrIn
 	ldr r0, [r0]	//get the value of the user input
 	cmp r0, r1	//compare 0 to the user input
 	ble badInput	//branch to the badInput if userIn is lessthan or equal to 0
@@ -40,6 +40,7 @@ vCheck:			//check for validity
 badInput:
 	.align 4
 	ldr r0, =badInText
+//	pop {r4}
 	bl printf
 	bl textOut
 goodInput:
@@ -48,20 +49,20 @@ goodInput:
 	//store the variables [sum, count, and usrIn] in various registers
 
 	ldr r0, =sum
-	ldr r0, [r0]
+	ldr r0, [r0]  //store the sum value
 	ldr r1, =count
-	ldr r1, [r1]
+	ldr r1, [r1]  //store the count value
 	ldr r2, =usrIn
-	ldr r2, [r2]
+	ldr r2, [r2]  //store the usrInput
 	ldr r3, =sumOfSquares
-	ldr r3, [r3]
+	ldr r3, [r3]  // store the sumOfSquares
 sumLoop:
 	add r0, r0 ,r1	//add the count to the sum
 	mul r4, r1, r1	//get the square of the count
 	add r3, r3, r4	//and add it to sumOfSquares
-	add r1, r1, #1
-	cmp r1, r2
-	blt sumLoop
+	add r1, r1, #1  //increment the counter
+	cmp r1, r2     //if the count is smaller than the usrInput
+	blt sumLoop    //loop again
 
 	ldr r5, =sumOfSquares
 	ldr r6, =sum
