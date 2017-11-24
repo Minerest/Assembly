@@ -25,8 +25,8 @@ setPWM: .asciz "gpio mode 1 pwm"
 setMS: .asciz "gpio pwm-ms"
 
 //Setting the clock and rate to be at 50hz. According to Wikipedia, ESC's should operate at a 50hz frequency
-// setting gpio pwm 1 @ 10 should equal 1.0 ms pulses which the ESC *SHOULD* consider the minimum value
-// setting the  PWM signal at 20 should equal to 2.0ms pulses which the ESC *SHOULD* consider its maximum value. 
+// setting gpio pwm 1 @ 40  should equal 1.0 ms pulses which the ESC *SHOULD* consider the minimum value
+// setting the  PWM signal at 80 should equal to 2.0ms pulses which the ESC *SHOULD* consider its maximum value. 
 
 setClock: .asciz "gpio pwmc 480"
 
@@ -47,6 +47,8 @@ val: .word 0
 
 main:
 	push {lr}
+
+	//The next dozen lines should setup the Raspberry pi for PWM output
 	ldr r0, =intro
 	bl printf
 	bl wiringPiSetup
@@ -64,24 +66,24 @@ main:
 	bl system
 
 
-	mov r0, #4 //Pin 4 should be what Im using for the butt$
+	mov r0, #4 //Pin 4 should be what Im using for the button1
         mov r1, #0 //0 for input
         bl pinMode
 
-	mov r0, #5 //Pin 5 should be what Im using for the butt$
+	mov r0, #5 //Pin 5 should be what Im using for the button2
         mov r1, #0 //0 for input
         bl pinMode
 
-	mov r0, #6 //Pin 6 should be what Im using for the butt$
+	mov r0, #6 //Pin 6 should be what Im using for the button3
         mov r1, #0 //0 for input
         bl pinMode
 
-	mov r0, #0 //Pin 4 should be what Im using for the butt$
+	mov r0, #0 //Pin 4 should be what Im using for the button4 i.e. cleanup
         mov r1, #0 //0 for input
         bl pinMode
 
-	ldr r0, =button3
-	bl system
+	ldr r0, =button3	//Setting the pwm signal at max "Throttle"
+	bl system		//Needed to arm the ESC, part of BLHeli_S protocol
 loop:
 	mov r0, #4	//button 1
 	bl digitalRead
@@ -109,12 +111,12 @@ b1_:			//label for clarity
 	ldr r0, =b1
 	bl printf
 
-	ldr r0, =button1
+	ldr r0, =button1//Sets PWM at min Freq
 	bl system
 	bal cont
 
 b2_:                    //label for clarity
-        ldr r0, =b2
+        ldr r0, =b2	//sets PWM at medium Freq
         bl printf
 
 	ldr r0, =button2
@@ -122,7 +124,7 @@ b2_:                    //label for clarity
         bal cont
 
 b3_:                    //label for clarity
-        ldr r0, =b3
+        ldr r0, =b3	//Setup PWM at Max Freq
         bl printf
 
 	ldr r0, =button3
@@ -130,7 +132,7 @@ b3_:                    //label for clarity
         bal cont
 
 b4_:                    //label for clarity
-        ldr r0, =b4
+        ldr r0, =b4	//Cleans the GPIO pins, just like Pythons GPIO library
         bl printf
 
         bal exit
@@ -139,7 +141,7 @@ noInput:
 	ldr r0, =nText
 	bl printf
 cont:
-	mov r0, #75
+	mov r0, #50	//Short delay
 	bl delay
 	bal loop
 exit:
