@@ -1,0 +1,93 @@
+/* How to store a structure, it's similar to an array!
+struct s{
+int a;
+int b;
+char c;
+float d
+}
+			//You have to notice that the frame pointer aka r11
+			// is moving by 4 bytes for every different piece of the structure
+sub fp, sp, #0		//I think it's storing the stack pointer in the frame pointer
+sub sp, sp, #16		//???
+mov r0, #1
+str r0, [fp]		//fp aka r11 s.a = 1
+mov r0, #2
+str r0, [fp, #-4]	//store r0 in r11 -4 bytes
+mov r0, #65		//65 is 'A' in ascii
+str r0, [fp, #-8]	//store 'A' in the stack
+mov r0, #40490FD0	//pi [3.14] in hex???
+str r0, [fp, #-12]	//store it in the stack
+
+*/
+
+
+
+
+/*
+			1 dimentional arrays!
+
+	arr[0] is the base address. The beginning of the array
+	Then to get arr[1], arr[2]... arr[n], you multiply n * data type size + the base address aka arr[0]
+	or address = base address + sizeof(arr) * n
+
+	to actually code the array in assembly
+
+a:  .skip 32 //saves space of 32 bytes from the lable a which is basically an array a with the size of 8 integers
+
+	mov r0, #0
+	ldr r4, =a	//stores the beginning of the array in r4
+loop:
+	cmp r0, #7	// 0 to 7 equals 8 elements of 4 bytes each
+	bgt done
+	mov r5, #0
+	str r5, [r4]
+	add r0, #1	//increment the index
+	add r4, #4	//go to the next element in array. 
+	bal loop	//to the top
+
+done:
+
+
+
+
+
+
+
+*/
+
+
+/*
+		//SLIGHTLY BETTER WAY
+	mov r0, #0	//index
+	mov r5, #0	//fill value to initialize the array
+	ldr r4, =a	//beginning of array
+loop:
+	cmp r0, #7
+	bgt done	//exit condition
+	mul r1, r0, #4 	//4 is the the data type size in the array
+	str r5, [r4, +r1]	//r5 = *(r4+r1)
+	add r0, #1
+	bal loop
+done:
+*/
+
+
+
+/*
+			//BEST WAY
+mov r0, #0
+mov r5, #0
+dr r4, =a
+
+loop:
+	cmp r0, #7
+	bgt done
+	str r5, [r4, +r0 ASL #2]	//Look up ASL
+					// I guess it means *(r4 + r0 * 4)
+
+	add r0, #1
+	bal loop
+done:
+
+
+*/
