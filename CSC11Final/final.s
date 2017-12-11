@@ -5,6 +5,9 @@
 .global main
 
 .section .data
+///////////////////////////////
+//TEXT OUTPUT//////////////////
+///////////////////////////////
 
 text: .asciz "button is pushed!\n"
 
@@ -19,7 +22,9 @@ b3: .asciz "button 3 is pressed!\n"
 b4: .asciz "button 4 is pressed!\n"
 
 intro: .asciz "this is a project that uses a pwm signal to power an Electronic Speed Controller [ESC] which in turn causes the motors to spin\n\n."
-
+///////////////////////////////
+//SYSTEM COMMANDS//////////////
+///////////////////////////////
 setPWM: .asciz "gpio mode 1 pwm"
 
 setMS: .asciz "gpio pwm-ms"
@@ -32,11 +37,11 @@ setClock: .asciz "gpio pwmc 480"
 
 setRate: .asciz "gpio pwmr 800"
 
-button1: .asciz "gpio pwm 1 40"
+button1: .asciz "gpio pwm 1 45"
 
 button2: .asciz "gpio pwm 1 60"
 
-button3: .asciz "gpio pwm 1 80"
+button3: .asciz "gpio pwm 1 75"
 
 cleanup: .asciz "gpio mode 1 in"
 
@@ -65,7 +70,7 @@ main:
 	ldr r0, =setRate
 	bl system
 
-
+	//Next set of lines are just to set the physical pins on the Raspberry Pi
 	mov r0, #4 //Pin 4 should be what Im using for the button1
         mov r1, #0 //0 for input
         bl pinMode
@@ -82,9 +87,10 @@ main:
         mov r1, #0 //0 for input
         bl pinMode
 
-	ldr r0, =button3	//Setting the pwm signal at max "Throttle"
+	ldr r0, =button3	//Setting the pwm signal at "Min Throttle," seems to be more reliable than setting it on the low end.
 	bl system		//Needed to arm the ESC, part of BLHeli_S protocol
 loop:
+	//Section where the raspberry pi listens to button presses
 	mov r0, #4	//button 1
 	bl digitalRead
 	cmp r0, #1
@@ -107,7 +113,7 @@ loop:
 
 	cmp r0, #1
 	bne noInput
-b1_:			//label for clarity
+b1_:			
 	ldr r0, =b1
 	bl printf
 
@@ -115,7 +121,7 @@ b1_:			//label for clarity
 	bl system
 	bal cont
 
-b2_:                    //label for clarity
+b2_:                    
         ldr r0, =b2	//sets PWM at medium Freq
         bl printf
 
@@ -123,7 +129,7 @@ b2_:                    //label for clarity
 	bl system
         bal cont
 
-b3_:                    //label for clarity
+b3_:                    
         ldr r0, =b3	//Setup PWM at Max Freq
         bl printf
 
@@ -131,15 +137,15 @@ b3_:                    //label for clarity
 	bl system
         bal cont
 
-b4_:                    //label for clarity
-        ldr r0, =b4	//Cleans the GPIO pins, just like Pythons GPIO library
+b4_:                    
+        ldr r0, =b4	//Cleans the GPIO pins, kind of like Pythons GPIO library
         bl printf
 
         bal exit
 
 noInput:
-	ldr r0, =nText
-	bl printf
+	//ldr r0, =nText
+	//bl printf		Commenting this out will probably improve the performance.
 cont:
 	mov r0, #50	//Short delay
 	bl delay
@@ -187,7 +193,7 @@ exit:
 /*	mov r0, #1024
 	bl pwmSetRange
 
-	mov r0, #1024
+	mov r0, #1024	
 	bl pwmSetClock
 
 /*	mov r0, #1
